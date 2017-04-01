@@ -42,20 +42,17 @@ interface Message
 
     /**
      * Make msg is done
-     * @return bool
      */
     public function done();
 
     /**
      * Make retry with msg
-     * @return bool
      */
     public function retry();
 
     /**
      * Make delay with msg
      * @param $seconds
-     * @return bool
      */
     public function delay($seconds);
 }

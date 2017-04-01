@@ -174,6 +174,23 @@ class Nsqd
     }
 
     /**
+     * @param $messageID
+     */
+    public function finish($messageID)
+    {
+        $this->connTCP->write(Command::finish($messageID));
+    }
+
+    /**
+     * @param $messageID
+     * @param $millisecond
+     */
+    public function requeue($messageID, $millisecond)
+    {
+        $this->connTCP->write(Command::requeue($messageID, $millisecond));
+    }
+
+    /**
      * @param $message
      * @return bool
      */
@@ -241,7 +258,15 @@ class Nsqd
                 return true;
                 break;
             case Specification::frameIsMessage($frame):
-                var_dump($frame);
+                $this->processingMessage(
+                    new Message(
+                        $frame['payload'],
+                        $frame['id'],
+                        $frame['attempts'],
+                        $frame['timestamp'],
+                        $this
+                    )
+                );
                 break;
             case Specification::frameIsHeartbeat($frame):
                 $this->connTCP->write(Command::nop());
@@ -260,5 +285,21 @@ class Nsqd
         }
 
         return false;
+    }
+
+    /**
+     * @param Message $message
+     */
+    private function processingMessage(Message $message)
+    {
+        try
+        {
+            call_user_func_array($this->subProcessor, [$message]);
+        }
+        catch (\Exception $exception)
+        {
+            // TODO add some logs
+            // TODO add observer for usr callback
+        }
     }
 }

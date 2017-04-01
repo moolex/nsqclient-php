@@ -112,12 +112,12 @@ class Command
     /**
      * Requeue [REQ]
      * @param string $id
-     * @param integer $timeMS
+     * @param integer $millisecond
      * @return string
      */
-    public static function requeue($id, $timeMS)
+    public static function requeue($id, $millisecond)
     {
-        return self::command('REQ', $id, $timeMS);
+        return self::command('REQ', $id, $millisecond);
     }
 
     /**

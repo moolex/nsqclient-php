@@ -8,9 +8,10 @@
 
 namespace NSQClient\Message;
 
-use NSQClient\Contract\Message as MsgInterface;
+use NSQClient\Connection\Nsqd;
+use NSQClient\Contract\Message as MessageInterface;
 
-class Message implements MsgInterface
+class Message implements MessageInterface
 {
     /**
      * @var string
@@ -38,19 +39,26 @@ class Message implements MsgInterface
     private $timestamp = null;
 
     /**
+     * @var Nsqd
+     */
+    private $nsqd = null;
+
+    /**
      * Message constructor.
      * @param $payload
      * @param null $id
      * @param null $attempts
      * @param null $timestamp
+     * @param Nsqd $nsqd
      */
-    public function __construct($payload, $id = null, $attempts = null, $timestamp = null)
+    public function __construct($payload, $id = null, $attempts = null, $timestamp = null, Nsqd $nsqd = null)
     {
         $this->id = $id;
         $this->payload = $payload;
         $this->attempts = $attempts;
         $this->timestamp = $timestamp;
         $this->data = $id ? json_decode($payload, true) : json_encode($payload);
+        $this->nsqd = $nsqd;
     }
 
     /**
@@ -94,27 +102,27 @@ class Message implements MsgInterface
     }
 
     /**
-     * @return bool
+     * just done
      */
     public function done()
     {
-
+        $this->nsqd->finish($this->id);
     }
 
     /**
-     * @return bool
+     * just retry
      */
     public function retry()
     {
-        return $this->delay(0);
+        $this->delay(0);
     }
 
     /**
+     * just delay
      * @param $seconds
-     * @return bool
      */
     public function delay($seconds)
     {
-
+        $this->nsqd->requeue($this->id, $seconds * 1000);
     }
 }
