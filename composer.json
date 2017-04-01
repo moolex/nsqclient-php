@@ -1,0 +1,11 @@
+{
+  "name": "moolex/nsqclient",
+  "require": {
+      "react/event-loop": "0.4.x-dev"
+  },
+  "autoload":{
+      "psr-4": {
+          "NSQClient\\": "src"
+      }
+  }
+}
