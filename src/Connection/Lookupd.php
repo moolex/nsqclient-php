@@ -20,6 +20,11 @@ class Lookupd
     private static $queryFormat = '/lookup?topic=%s';
 
     /**
+     * @var array
+     */
+    private static $caches = [];
+
+    /**
      * @param Endpoint $endpoint
      * @param $topic
      * @return array
@@ -27,6 +32,11 @@ class Lookupd
      */
     public static function getNodes(Endpoint $endpoint, $topic)
     {
+        if (isset(self::$caches[$endpoint->getUniqueID()][$topic]))
+        {
+            return self::$caches[$endpoint->getUniqueID()][$topic];
+        }
+
         $url = $endpoint->getLookupd() . sprintf(self::$queryFormat, $topic);
 
         list($error, $result) = HTTP::get($url);
@@ -38,7 +48,7 @@ class Lookupd
         }
         else
         {
-            return self::parseResult($result, $topic);
+            return self::$caches[$endpoint->getUniqueID()][$topic] = self::parseResult($result, $topic);
         }
     }
 

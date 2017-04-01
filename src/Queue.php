@@ -15,9 +15,23 @@ use NSQClient\Connection\Pool;
 
 class Queue
 {
+    /**
+     * @param Endpoint $endpoint
+     * @param $topic
+     * @param $message
+     * @return bool
+     */
     public static function publish(Endpoint $endpoint, $topic, $message)
     {
+        $routes = Lookupd::getNodes($endpoint, $topic);
 
+        $route = $routes[rand(0, count($routes) - 1)];
+
+        return Pool::register([$route['host']], function () use ($endpoint, $route) {
+
+            return (new Nsqd($endpoint))->setRoute($route);
+
+        })->publish($message);
     }
 
     /**
@@ -34,7 +48,9 @@ class Queue
         foreach ($routes as $route)
         {
             Pool::register([$route['host'], $route['topic']], function () use ($endpoint, $route, $processor, $lifecycle) {
+
                 return (new Nsqd($endpoint))->setRoute($route)->setLifecycle($lifecycle)->setProcessor($processor);
+
             })->subscribe($channel);
         }
 

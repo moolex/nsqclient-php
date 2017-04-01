@@ -16,12 +16,26 @@ class Endpoint
     private $lookupd = 'http://nsqlookupd.local.moyo.im:4161';
 
     /**
+     * @var string
+     */
+    private $uniqueID = 'hash';
+
+    /**
      * Endpoint constructor.
      * @param $lookupd
      */
     public function __construct($lookupd)
     {
         $this->lookupd = $lookupd;
+        $this->uniqueID = spl_object_hash($this);
+    }
+
+    /**
+     * @return string
+     */
+    public function getUniqueID()
+    {
+        return $this->uniqueID;
     }
 
     /**

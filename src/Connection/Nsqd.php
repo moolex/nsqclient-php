@@ -9,11 +9,17 @@
 namespace NSQClient\Connection;
 
 use NSQClient\Access\Endpoint;
+use NSQClient\Connection\Transport\HTTP;
 use NSQClient\Connection\Transport\TCP;
 use NSQClient\Contract\Network\Stream;
 use NSQClient\Exception\GenericErrorException;
+use NSQClient\Exception\InvalidMessageException;
+use NSQClient\Exception\NetworkSocketException;
 use NSQClient\Exception\UnknownProtocolException;
+use NSQClient\Message\Bag as MessageBag;
+use NSQClient\Message\Message;
 use NSQClient\Protocol\Command;
+use NSQClient\Protocol\CommandHTTP;
 use NSQClient\Protocol\Specification;
 use NSQClient\SDK;
 
@@ -141,6 +147,15 @@ class Nsqd
     }
 
     /**
+     * @param $message
+     * @return bool
+     */
+    public function publish($message)
+    {
+        return $this->endpoint->getConnType() == 'tcp' ? $this->publishViaTCP($message) : $this->publishViaHTTP($message);
+    }
+
+    /**
      * @param $channel
      */
     public function subscribe($channel)
@@ -156,6 +171,62 @@ class Nsqd
         $this->connTCP->write(Command::identify(getmypid(), gethostname(), sprintf('%s/%s', SDK::NAME, SDK::VERSION)));
         $this->connTCP->write(Command::subscribe($this->topic, $channel));
         $this->connTCP->write(Command::ready(1));
+    }
+
+    /**
+     * @param $message
+     * @return bool
+     */
+    private function publishViaHTTP($message)
+    {
+        if ($message instanceof Message)
+        {
+            list($uri, $data) = CommandHTTP::message($this->topic, $message->data());
+        }
+        else if ($message instanceof MessageBag)
+        {
+            list($uri, $data) = CommandHTTP::messages($this->topic, $message->export());
+        }
+        else
+        {
+            throw new InvalidMessageException('Unknowns message object');
+        }
+
+        list($error, $result) = HTTP::post(sprintf('http://%s:%d/%s', $this->host, $this->portHTTP, $uri), $data);
+
+        if ($error)
+        {
+            list($netErrNo, $netErrMsg) = $error;
+            throw new NetworkSocketException($netErrMsg, $netErrNo);
+        }
+        else
+        {
+            return $result === 'OK' ? true : false;
+        }
+    }
+
+    /**
+     * @param $message
+     * @return bool
+     */
+    private function publishViaTCP($message)
+    {
+        if ($message instanceof Message)
+        {
+            $buffer = Command::message($this->topic, $message->data());
+        }
+        else if ($message instanceof MessageBag)
+        {
+            $buffer = Command::messages($this->topic, $message->export());
+        }
+        else
+        {
+            throw new InvalidMessageException('Unknowns message object');
+        }
+
+        $this->connTCP->write($buffer);
+
+        return $this->dispatching(Specification::readFrame($this->connTCP));
     }
 
     /**
@@ -185,7 +256,7 @@ class Nsqd
                 // TODO safety to exit process
                 break;
             default:
-                throw new UnknownProtocolException('Unknown protocol data ('.json_encode($frame).')');
+                throw new UnknownProtocolException('Unknowns protocol data ('.json_encode($frame).')');
         }
 
         return false;
