@@ -8,6 +8,8 @@
 
 namespace NSQClient\Access;
 
+use NSQClient\Exception\InvalidLookupdException;
+
 class Endpoint
 {
     /**
@@ -23,11 +25,19 @@ class Endpoint
     /**
      * Endpoint constructor.
      * @param $lookupd
+     * @throws InvalidLookupdException
      */
     public function __construct($lookupd)
     {
         $this->lookupd = $lookupd;
         $this->uniqueID = spl_object_hash($this);
+
+        // checks
+        $parsed = parse_url($this->lookupd);
+        if (!isset($parsed['host']))
+        {
+            throw new InvalidLookupdException;
+        }
     }
 
     /**

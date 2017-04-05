@@ -31,7 +31,7 @@ class Queue
 
             return (new Nsqd($endpoint))->setRoute($route);
 
-        })->publish($message);
+        })->setTopic($topic)->publish($message);
     }
 
     /**
@@ -47,9 +47,13 @@ class Queue
 
         foreach ($routes as $route)
         {
-            Pool::register([$route['host'], $route['topic']], function () use ($endpoint, $route, $processor, $lifecycle) {
+            Pool::register([$route['host'], $route['topic']], function () use ($endpoint, $route, $topic, $processor, $lifecycle) {
 
-                return (new Nsqd($endpoint))->setRoute($route)->setLifecycle($lifecycle)->setProcessor($processor);
+                return (new Nsqd($endpoint))
+                    ->setRoute($route)
+                    ->setTopic($topic)
+                    ->setLifecycle($lifecycle)
+                    ->setProcessor($processor);
 
             })->subscribe($channel);
         }

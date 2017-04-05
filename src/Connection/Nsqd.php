@@ -86,8 +86,6 @@ class Nsqd
      */
     public function setRoute($route)
     {
-        $this->topic = $route['topic'];
-
         $this->host = $route['host'];
         $this->portTCP = $route['ports']['tcp'];
         $this->portHTTP = $route['ports']['http'];
@@ -96,6 +94,17 @@ class Nsqd
         {
             $this->connTCP->setTarget($this->host, $this->portTCP);
         }
+
+        return $this;
+    }
+
+    /**
+     * @param $topic
+     * @return self
+     */
+    public function setTopic($topic)
+    {
+        $this->topic = $topic;
 
         return $this;
     }
