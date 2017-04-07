@@ -56,6 +56,8 @@ class Nsqd
     private $topic = 'topic';
 
     /**
+     * PUB: Idle seconds before recycling
+     * SUB: Run seconds before exiting
      * @var int
      */
     private $lifecycle = 0;
@@ -121,10 +123,20 @@ class Nsqd
     }
 
     /**
+     * @return self
+     */
+    public function setProducer()
+    {
+        $this->connTCP->setRecycling($this->lifecycle);
+
+        return $this;
+    }
+
+    /**
      * @param callable $processor
      * @return self
      */
-    public function setProcessor(callable $processor)
+    public function setConsumer(callable $processor)
     {
         $this->subProcessor = $processor;
 
@@ -252,7 +264,13 @@ class Nsqd
 
         $this->connTCP->write($buffer);
 
-        return $this->dispatching(Specification::readFrame($this->connTCP));
+        do
+        {
+            $result = $this->dispatching(Specification::readFrame($this->connTCP));
+        }
+        while (is_null($result));
+
+        return $result;
     }
 
     /**
@@ -279,6 +297,7 @@ class Nsqd
                 break;
             case Specification::frameIsHeartbeat($frame):
                 $this->connTCP->write(Command::nop());
+                return null;
                 break;
             case Specification::frameIsError($frame):
                 throw new GenericErrorException($frame['error']);

@@ -60,6 +60,16 @@ class TCP implements Stream
     private $writeTimeoutUsec = 0;
 
     /**
+     * @var int
+     */
+    private $connRecyclingSec = 0;
+
+    /**
+     * @var int
+     */
+    private $connEstablishedTime = 0;
+
+    /**
      * @param $host
      * @param $port
      */
@@ -97,6 +107,14 @@ class TCP implements Stream
     }
 
     /**
+     * @param $seconds
+     */
+    public function setRecycling($seconds)
+    {
+        $this->connRecyclingSec = $seconds;
+    }
+
+    /**
      * @param callable $processor
      */
     public function setHandshake(callable $processor)
@@ -111,7 +129,20 @@ class TCP implements Stream
     {
         if ($this->socket)
         {
-            return $this->socket;
+            if (
+                $this->connRecyclingSec
+                &&
+                $this->connEstablishedTime
+                &&
+                (time() - $this->connEstablishedTime > $this->connRecyclingSec)
+            )
+            {
+                $this->close();
+            }
+            else
+            {
+                return $this->socket;
+            }
         }
 
         $netErrNo = $netErrMsg = null;
@@ -121,6 +152,10 @@ class TCP implements Stream
         if ($this->socket === false)
         {
             throw new NetworkSocketException("Connecting failed [{$this->host}:{$this->port}] - {$netErrMsg}", $netErrNo);
+        }
+        else
+        {
+            $this->connEstablishedTime = time();
         }
 
         stream_set_blocking($this->socket, $this->blocking ? 1 : 0);
@@ -209,5 +244,15 @@ class TCP implements Stream
         }
 
         return $buffer;
+    }
+
+    /**
+     * @return bool
+     */
+    public function close()
+    {
+        $closed = fclose($this->socket);
+        $this->socket = null;
+        return $closed;
     }
 }

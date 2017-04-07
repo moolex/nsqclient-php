@@ -29,7 +29,10 @@ class Queue
 
         return Pool::register([$route['host']], function () use ($endpoint, $route) {
 
-            return (new Nsqd($endpoint))->setRoute($route);
+            return (new Nsqd($endpoint))
+                ->setRoute($route)
+                ->setLifecycle(SDK::$pubRecyclingSec)
+                ->setProducer();
 
         })->setTopic($topic)->publish($message);
     }
@@ -53,7 +56,7 @@ class Queue
                     ->setRoute($route)
                     ->setTopic($topic)
                     ->setLifecycle($lifecycle)
-                    ->setProcessor($processor);
+                    ->setConsumer($processor);
 
             })->subscribe($channel);
         }

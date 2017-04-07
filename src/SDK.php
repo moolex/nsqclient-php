@@ -19,4 +19,9 @@ class SDK
      * amazing name
      */
     const NAME = 'nsqclient';
+
+    /**
+     * @var int
+     */
+    public static $pubRecyclingSec = 45;
 }
