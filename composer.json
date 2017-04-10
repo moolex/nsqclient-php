@@ -1,7 +1,10 @@
 {
   "name": "moolex/nsqclient",
+  "keywords": ["nsq"],
+  "license": "MIT",
   "require": {
-      "react/event-loop": "0.4.x-dev"
+      "psr/log": "~1.0",
+      "react/event-loop": "~0.4"
   },
   "autoload":{
       "psr-4": {

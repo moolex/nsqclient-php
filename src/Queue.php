@@ -12,6 +12,7 @@ use NSQClient\Access\Endpoint;
 use NSQClient\Connection\Lookupd;
 use NSQClient\Connection\Nsqd;
 use NSQClient\Connection\Pool;
+use NSQClient\Logger\Logger;
 
 class Queue
 {
@@ -29,6 +30,10 @@ class Queue
 
         return Pool::register([$route['host']], function () use ($endpoint, $route) {
 
+            Logger::ins()->info('Creating new nsqd for producer', [
+                'lookupd' => $endpoint->getLookupd(),
+                'route' => $route
+            ]);
             return (new Nsqd($endpoint))
                 ->setRoute($route)
                 ->setLifecycle(SDK::$pubRecyclingSec)
@@ -52,6 +57,12 @@ class Queue
         {
             Pool::register([$route['host'], $route['topic']], function () use ($endpoint, $route, $topic, $processor, $lifecycle) {
 
+                Logger::ins()->info('Creating new nsqd for consumer', [
+                    'lookupd' => $endpoint->getLookupd(),
+                    'route' => $route,
+                    'topic' => $topic,
+                    'lifecycle' => $lifecycle
+                ]);
                 return (new Nsqd($endpoint))
                     ->setRoute($route)
                     ->setTopic($topic)

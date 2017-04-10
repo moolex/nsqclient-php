@@ -8,6 +8,8 @@
 
 namespace NSQClient;
 
+use Psr\Log\LoggerInterface;
+
 class SDK
 {
     /**
@@ -24,4 +26,17 @@ class SDK
      * @var int
      */
     public static $pubRecyclingSec = 45;
+
+    /**
+     * @var LoggerInterface
+     */
+    public static $presentLogger = null;
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    public static function setLogger(LoggerInterface $logger)
+    {
+        self::$presentLogger = $logger;
+    }
 }

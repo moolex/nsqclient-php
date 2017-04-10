@@ -11,6 +11,7 @@ namespace NSQClient\Connection;
 use NSQClient\Access\Endpoint;
 use NSQClient\Connection\Transport\HTTP;
 use NSQClient\Exception\LookupTopicException;
+use NSQClient\Logger\Logger;
 
 class Lookupd
 {
@@ -44,10 +45,12 @@ class Lookupd
         if ($error)
         {
             list($netErrNo, $netErrMsg) = $error;
+            Logger::ins()->error('Lookupd request failed', ['no' => $netErrNo, 'msg' => $netErrMsg]);
             throw new LookupTopicException($netErrMsg, $netErrNo);
         }
         else
         {
+            Logger::ins()->debug('Lookupd results got', ['raw' => $result]);
             return self::$caches[$endpoint->getUniqueID()][$topic] = self::parseResult($result, $topic);
         }
     }

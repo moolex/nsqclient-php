@@ -16,6 +16,7 @@ use NSQClient\Exception\GenericErrorException;
 use NSQClient\Exception\InvalidMessageException;
 use NSQClient\Exception\NetworkSocketException;
 use NSQClient\Exception\UnknownProtocolException;
+use NSQClient\Logger\Logger;
 use NSQClient\Message\Bag as MessageBag;
 use NSQClient\Message\Message;
 use NSQClient\Protocol\Command;
@@ -200,6 +201,8 @@ class Nsqd
         $this->connTCP->write(Command::identify(getmypid(), gethostname(), sprintf('%s/%s', SDK::NAME, SDK::VERSION)));
         $this->connTCP->write(Command::subscribe($this->topic, $channel));
         $this->connTCP->write(Command::ready(1));
+
+        Logger::ins()->debug('Consumer is ready', $this->loggingMeta());
     }
 
     /**
@@ -207,6 +210,7 @@ class Nsqd
      */
     public function finish($messageID)
     {
+        Logger::ins()->debug('Make message is finished', $this->loggingMeta(['id' => $messageID]));
         $this->connTCP->write(Command::finish($messageID));
     }
 
@@ -216,6 +220,7 @@ class Nsqd
      */
     public function requeue($messageID, $millisecond)
     {
+        Logger::ins()->debug('Make message is requeued', $this->loggingMeta(['id' => $messageID, 'delay' => $millisecond]));
         $this->connTCP->write(Command::requeue($messageID, $millisecond));
     }
 
@@ -224,6 +229,7 @@ class Nsqd
      */
     public function closing()
     {
+        Logger::ins()->info('Consumer is closing', $this->loggingMeta());
         $this->connTCP->write(Command::close());
     }
 
@@ -232,6 +238,7 @@ class Nsqd
      */
     public function exiting()
     {
+        Logger::ins()->info('Consumer is exiting', $this->loggingMeta());
         $this->connTCP->close();
         Pool::getEvLoop()->stop();
     }
@@ -252,6 +259,7 @@ class Nsqd
         }
         else
         {
+            Logger::ins()->error('Un-expected pub message', $this->loggingMeta(['input' => json_encode($message)]));
             throw new InvalidMessageException('Unknowns message object');
         }
 
@@ -260,6 +268,7 @@ class Nsqd
         if ($error)
         {
             list($netErrNo, $netErrMsg) = $error;
+            Logger::ins()->error('HTTP Publish is failed', $this->loggingMeta(['no' => $netErrNo, 'msg' => $netErrMsg]));
             throw new NetworkSocketException($netErrMsg, $netErrNo);
         }
         else
@@ -284,6 +293,7 @@ class Nsqd
         }
         else
         {
+            Logger::ins()->error('Un-expected pub message', $this->loggingMeta(['input' => json_encode($message)]));
             throw new InvalidMessageException('Unknowns message object');
         }
 
@@ -300,7 +310,7 @@ class Nsqd
 
     /**
      * @param $frame
-     * @return bool
+     * @return bool|null
      */
     private function dispatching($frame)
     {
@@ -310,6 +320,7 @@ class Nsqd
                 return true;
                 break;
             case Specification::frameIsMessage($frame):
+                Logger::ins()->debug('FRAME got is message', $this->loggingMeta(['id' => $frame['id'], 'data' => $frame['payload']]));
                 $this->processingMessage(
                     new Message(
                         $frame['payload'],
@@ -319,25 +330,30 @@ class Nsqd
                         $this
                     )
                 );
+                return null;
                 break;
             case Specification::frameIsHeartbeat($frame):
+                Logger::ins()->debug('FRAME got is heartbeat', $this->loggingMeta());
                 $this->connTCP->write(Command::nop());
                 return null;
                 break;
             case Specification::frameIsError($frame):
+                Logger::ins()->error('FRAME got is error', $this->loggingMeta(['error' => $frame['error']]));
                 throw new GenericErrorException($frame['error']);
                 break;
             case Specification::frameIsBroken($frame):
+                Logger::ins()->warning('FRAME got is broken', $this->loggingMeta(['error' => $frame['error']]));
                 throw new GenericErrorException($frame['error']);
                 break;
             case Specification::frameIsCloseWait($frame):
+                Logger::ins()->debug('FRAME got is close-wait', $this->loggingMeta());
                 $this->exiting();
+                return null;
                 break;
             default:
+                Logger::ins()->warning('FRAME got is unknowns', $this->loggingMeta());
                 throw new UnknownProtocolException('Unknowns protocol data ('.json_encode($frame).')');
         }
-
-        return false;
     }
 
     /**
@@ -351,8 +367,24 @@ class Nsqd
         }
         catch (\Exception $exception)
         {
-            // TODO add some logs
             // TODO add observer for usr callback
+            Logger::ins()->critical('Consuming processor has exception', $this->loggingMeta([
+                'cls' => get_class($exception),
+                'msg' => $exception->getMessage()
+            ]));
         }
+    }
+
+    /**
+     * @param $extra
+     * @return array
+     */
+    private function loggingMeta($extra = [])
+    {
+        return array_merge([
+            'topic' => $this->topic,
+            'host' => $this->host,
+            'port-tcp' => $this->portTCP
+        ], $extra);
     }
 }
