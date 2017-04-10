@@ -140,6 +140,14 @@ class Nsqd
     {
         $this->subProcessor = $processor;
 
+        if ($this->lifecycle)
+        {
+            $nsqd = $this;
+            Pool::getEvLoop()->addTimer($this->lifecycle, function () use ($nsqd) {
+                $nsqd->closing();
+            });
+        }
+
         return $this;
     }
 
@@ -209,6 +217,23 @@ class Nsqd
     public function requeue($messageID, $millisecond)
     {
         $this->connTCP->write(Command::requeue($messageID, $millisecond));
+    }
+
+    /**
+     * subscribe closing
+     */
+    public function closing()
+    {
+        $this->connTCP->write(Command::close());
+    }
+
+    /**
+     * process exiting
+     */
+    public function exiting()
+    {
+        $this->connTCP->close();
+        Pool::getEvLoop()->stop();
     }
 
     /**
@@ -306,7 +331,7 @@ class Nsqd
                 throw new GenericErrorException($frame['error']);
                 break;
             case Specification::frameIsCloseWait($frame):
-                // TODO safety to exit process
+                $this->exiting();
                 break;
             default:
                 throw new UnknownProtocolException('Unknowns protocol data ('.json_encode($frame).')');
