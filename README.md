@@ -16,7 +16,7 @@ composer require moolex/nsqclient dev-master
 $topic = 'my_topic';
 $endpoint = new \NSQClient\Access\Endpoint('http://127.0.0.1:4161');
 $message = new \NSQClient\Message\Message('hello world');
-$result = \NSQClient\Queue::publish($endpoint, $topic, $messsage);
+$result = \NSQClient\Queue::publish($endpoint, $topic, $message);
 ```
 
 #### Publish (batch)
@@ -25,7 +25,7 @@ $result = \NSQClient\Queue::publish($endpoint, $topic, $messsage);
 $topic = 'my_topic';
 $endpoint = new \NSQClient\Access\Endpoint('http://127.0.0.1:4161');
 $message = \NSQClient\Message\Bag::generate(['msg data 1', 'msg data 2']);
-$result = \NSQClient\Queue::publish($endpoint, $topic, $messsage);
+$result = \NSQClient\Queue::publish($endpoint, $topic, $message);
 ```
 
 #### Subscribe
