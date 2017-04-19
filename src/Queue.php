@@ -28,7 +28,9 @@ class Queue
 
         $route = $routes[rand(0, count($routes) - 1)];
 
-        return Pool::register([$route['host']], function () use ($endpoint, $route) {
+        $keys = [$route['host'], $route['ports']['tcp']];
+
+        return Pool::register($keys, function () use ($endpoint, $route) {
 
             Logger::ins()->info('Creating new nsqd for producer', [
                 'lookupd' => $endpoint->getLookupd(),
@@ -55,7 +57,9 @@ class Queue
 
         foreach ($routes as $route)
         {
-            Pool::register([$route['host'], $route['topic']], function () use ($endpoint, $route, $topic, $processor, $lifecycle) {
+            $keys = [$route['topic'], $route['host'], $route['ports']['tcp']];
+
+            Pool::register($keys, function () use ($endpoint, $route, $topic, $processor, $lifecycle) {
 
                 Logger::ins()->info('Creating new nsqd for consumer', [
                     'lookupd' => $endpoint->getLookupd(),
