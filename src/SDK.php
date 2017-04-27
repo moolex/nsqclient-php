@@ -33,10 +33,23 @@ class SDK
     public static $presentLogger = null;
 
     /**
+     * @var bool
+     */
+    public static $enabledStringPack = true;
+
+    /**
      * @param LoggerInterface $logger
      */
     public static function setLogger(LoggerInterface $logger)
     {
         self::$presentLogger = $logger;
+    }
+
+    /**
+     * @param $enable
+     */
+    public static function setStringPack($enable)
+    {
+        self::$enabledStringPack = $enable;
     }
 }

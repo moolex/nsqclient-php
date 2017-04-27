@@ -9,6 +9,7 @@
 namespace NSQClient\Protocol;
 
 use NSQClient\Contract\Network\Stream;
+use NSQClient\SDK;
 
 class Binary
 {
@@ -83,6 +84,11 @@ class Binary
      */
     public static function readString(Stream $buffer, $size)
     {
+        if (!SDK::$enabledStringPack)
+        {
+            return $buffer->read($size);
+        }
+
         $temp = @unpack('c'.$size.'chars', $buffer->read($size));
         if (is_array($temp))
         {
@@ -109,6 +115,11 @@ class Binary
      */
     public static function packString($data)
     {
+        if (!SDK::$enabledStringPack)
+        {
+            return $data;
+        }
+
         $out = '';
         $len = strlen($data);
         for ($i = 0; $i < $len; $i++)
