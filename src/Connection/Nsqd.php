@@ -210,6 +210,8 @@ class Nsqd
         $this->connTCP->write(Command::subscribe($this->topic, $channel));
         $this->connTCP->write(Command::ready(1));
 
+        Pool::setEvAttached();
+
         Logger::ins()->debug('Consumer is ready', $this->loggingMeta());
     }
 
@@ -248,7 +250,7 @@ class Nsqd
     {
         Logger::ins()->info('Consumer is exiting', $this->loggingMeta());
         $this->connTCP->close();
-        Pool::getEvLoop()->stop();
+        Pool::setEvDetached();
     }
 
     /**

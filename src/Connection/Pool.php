@@ -10,6 +10,7 @@ namespace NSQClient\Connection;
 
 use NSQClient\Contract\Network\Stream;
 use NSQClient\Exception\PoolMissingSocketException;
+use NSQClient\Logger\Logger;
 use NSQClient\Utils\GracefulShutdown;
 use React\EventLoop\Factory;
 use React\EventLoop\LoopInterface;
@@ -30,6 +31,11 @@ class Pool
      * @var LoopInterface
      */
     private static $evLoops = null;
+
+    /**
+     * @var int
+     */
+    private static $evAttached = 0;
 
     /**
      * @return Nsqd[]
@@ -93,6 +99,27 @@ class Pool
             GracefulShutdown::init(self::$evLoops);
         }
         return self::$evLoops;
+    }
+
+    /**
+     * New attach by consumer connects
+     */
+    public static function setEvAttached()
+    {
+        self::$evAttached ++;
+    }
+
+    /**
+     * New detach by consumer closing
+     */
+    public static function setEvDetached()
+    {
+        self::$evAttached --;
+        if (self::$evAttached <= 0)
+        {
+            Logger::ins()->info('ALL event detached .. perform shutdown');
+            self::$evLoops && self::$evLoops->stop();
+        }
     }
 
     /**

@@ -52,7 +52,7 @@ class GracefulShutdown
      */
     public static function signalHandler($signal)
     {
-        Logger::ins()->info('Signal ['.self::$acceptSignals[$signal].'] received ..');
+        Logger::ins()->info('Signal ['.self::$acceptSignals[$signal].'] received .. prepare shutdown');
 
         $instances = Pool::instances();
         foreach ($instances as $nsqdIns)
