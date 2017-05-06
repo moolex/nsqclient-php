@@ -169,6 +169,14 @@ class Nsqd
     }
 
     /**
+     * @return bool
+     */
+    public function isConsumer()
+    {
+        return ! is_null($this->subProcessor);
+    }
+
+    /**
      * @param Stream $stream
      */
     public function handshake(Stream $stream)
@@ -236,7 +244,7 @@ class Nsqd
     /**
      * process exiting
      */
-    public function exiting()
+    private function exiting()
     {
         Logger::ins()->info('Consumer is exiting', $this->loggingMeta());
         $this->connTCP->close();

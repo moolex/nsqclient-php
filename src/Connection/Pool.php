@@ -10,6 +10,7 @@ namespace NSQClient\Connection;
 
 use NSQClient\Contract\Network\Stream;
 use NSQClient\Exception\PoolMissingSocketException;
+use NSQClient\Utils\GracefulShutdown;
 use React\EventLoop\Factory;
 use React\EventLoop\LoopInterface;
 
@@ -29,6 +30,14 @@ class Pool
      * @var LoopInterface
      */
     private static $evLoops = null;
+
+    /**
+     * @return Nsqd[]
+     */
+    public static function instances()
+    {
+        return self::$instances;
+    }
 
     /**
      * @param array $factors
@@ -81,6 +90,7 @@ class Pool
         if (is_null(self::$evLoops))
         {
             self::$evLoops = Factory::create();
+            GracefulShutdown::init(self::$evLoops);
         }
         return self::$evLoops;
     }
