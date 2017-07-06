@@ -58,11 +58,14 @@ class Command
      * Publish [PUB]
      * @param string $topic
      * @param string $message
+     * @param int $deferred
      * @return string
      */
-    public static function message($topic, $message)
+    public static function message($topic, $message, $deferred = null)
     {
-        $cmd = self::command('PUB', $topic);
+        $cmd = is_null($deferred)
+            ? self::command('PUB', $topic)
+            : self::command('DPUB', $topic, $deferred);
         $data = Binary::packString($message);
         $size = pack('N', strlen($data));
         return $cmd . $size . $data;

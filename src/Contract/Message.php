@@ -55,4 +55,11 @@ interface Message
      * @param $seconds
      */
     public function delay($seconds);
+
+    /**
+     * Set msg deferred or get msg's deferred milliseconds
+     * @param $seconds
+     * @return int|static
+     */
+    public function deferred($seconds = null);
 }

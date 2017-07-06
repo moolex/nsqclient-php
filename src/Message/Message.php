@@ -39,6 +39,11 @@ class Message implements MessageInterface
     private $timestamp = null;
 
     /**
+     * @var int
+     */
+    private $deferred = null;
+
+    /**
      * @var Nsqd
      */
     private $nsqd = null;
@@ -124,5 +129,22 @@ class Message implements MessageInterface
     public function delay($seconds)
     {
         $this->nsqd->requeue($this->id, $seconds * 1000);
+    }
+
+    /**
+     * @param $seconds
+     * @return null|int|static
+     */
+    public function deferred($seconds = null)
+    {
+        if (is_null($seconds))
+        {
+            return $this->deferred;
+        }
+        else
+        {
+            $this->deferred = $seconds * 1000;
+            return $this;
+        }
     }
 }

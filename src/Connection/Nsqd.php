@@ -295,7 +295,7 @@ class Nsqd
     {
         if ($message instanceof Message)
         {
-            $buffer = Command::message($this->topic, $message->data());
+            $buffer = Command::message($this->topic, $message->data(), $message->deferred());
         }
         else if ($message instanceof MessageBag)
         {
