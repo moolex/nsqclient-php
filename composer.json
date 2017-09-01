@@ -3,14 +3,22 @@
   "keywords": ["nsq"],
   "license": "MIT",
   "require": {
-      "psr/log": "~1.0",
-      "react/event-loop": "~0.4",
-      "php": ">=5.6",
-      "ext-bcmath" : "*"
+    "psr/log": "~1.0",
+    "react/event-loop": "~0.4",
+    "php": ">=5.6",
+    "ext-bcmath": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~5"
   },
   "autoload":{
-      "psr-4": {
-          "NSQClient\\": "src"
-      }
+    "psr-4": {
+      "NSQClient\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "NSQClient\\Tests\\": "tests/source"
+    }
   }
 }

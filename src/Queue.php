@@ -8,6 +8,7 @@
 
 namespace NSQClient;
 
+use NSQClient\Async\Queue as QueueAsync;
 use NSQClient\Access\Endpoint;
 use NSQClient\Connection\Lookupd;
 use NSQClient\Connection\Nsqd;
@@ -18,12 +19,15 @@ class Queue
 {
     /**
      * @param Endpoint $endpoint
-     * @param $topic
-     * @param $message
+     * @param string $topic
+     * @param mixed $message
+     * @param callable $asyncResult
      * @return bool
      */
-    public static function publish(Endpoint $endpoint, $topic, $message)
+    public static function publish(Endpoint $endpoint, $topic, $message, callable $asyncResult = null)
     {
+        if ($endpoint->isAsynced()) return QueueAsync::publish($endpoint, $topic, $message, $asyncResult);
+
         $routes = Lookupd::getNodes($endpoint, $topic);
 
         $route = $routes[rand(0, count($routes) - 1)];
@@ -50,9 +54,12 @@ class Queue
      * @param string $channel
      * @param callable $processor
      * @param int $lifecycle
+     * @return null
      */
     public static function subscribe(Endpoint $endpoint, $topic, $channel, callable $processor, $lifecycle = 0)
     {
+        if ($endpoint->isAsynced()) return QueueAsync::subscribe($endpoint, $topic, $channel, $processor, $lifecycle);
+
         $routes = Lookupd::getNodes($endpoint, $topic);
 
         foreach ($routes as $route)
@@ -77,5 +84,7 @@ class Queue
         }
 
         Pool::getEvLoop()->run();
+
+        return null;
     }
 }

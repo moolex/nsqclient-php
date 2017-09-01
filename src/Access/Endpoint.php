@@ -8,6 +8,7 @@
 
 namespace NSQClient\Access;
 
+use NSQClient\Async\Policy;
 use NSQClient\Exception\InvalidLookupdException;
 
 class Endpoint
@@ -21,6 +22,16 @@ class Endpoint
      * @var string
      */
     private $uniqueID = 'hash';
+
+    /**
+     * @var Asynced
+     */
+    private $asynced = null;
+
+    /**
+     * @var Policy
+     */
+    private $asyncPolicy = null;
 
     /**
      * Endpoint constructor.
@@ -38,6 +49,42 @@ class Endpoint
         {
             throw new InvalidLookupdException;
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAsynced()
+    {
+        return ! is_null($this->asynced);
+    }
+
+    /**
+     * @param Asynced $asynced
+     * @param Policy $policy
+     * @return self
+     */
+    public function setAsynced(Asynced $asynced, Policy $policy = null)
+    {
+        $this->asynced = $asynced;
+        $this->asyncPolicy = $policy ?: new Policy;
+        return $this;
+    }
+
+    /**
+     * @return Asynced
+     */
+    public function getAsynced()
+    {
+        return $this->asynced;
+    }
+
+    /**
+     * @return Policy
+     */
+    public function getAsyncPolicy()
+    {
+        return $this->asyncPolicy;
     }
 
     /**

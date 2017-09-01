@@ -8,8 +8,8 @@
 
 namespace NSQClient\Message;
 
-use NSQClient\Connection\Nsqd;
 use NSQClient\Contract\Message as MessageInterface;
+use NSQClient\Contract\NMOps;
 
 class Message implements MessageInterface
 {
@@ -44,9 +44,9 @@ class Message implements MessageInterface
     private $deferred = null;
 
     /**
-     * @var Nsqd
+     * @var NMOps
      */
-    private $nsqd = null;
+    private $nmOps = null;
 
     /**
      * Message constructor.
@@ -54,16 +54,16 @@ class Message implements MessageInterface
      * @param null $id
      * @param null $attempts
      * @param null $timestamp
-     * @param Nsqd $nsqd
+     * @param NMOps $nmOps
      */
-    public function __construct($payload, $id = null, $attempts = null, $timestamp = null, Nsqd $nsqd = null)
+    public function __construct($payload, $id = null, $attempts = null, $timestamp = null, NMOps $nmOps = null)
     {
         $this->id = $id;
         $this->payload = $payload;
         $this->attempts = $attempts;
         $this->timestamp = $timestamp;
         $this->data = $id ? json_decode($payload, true) : json_encode($payload);
-        $this->nsqd = $nsqd;
+        $this->nmOps = $nmOps;
     }
 
     /**
@@ -111,7 +111,7 @@ class Message implements MessageInterface
      */
     public function done()
     {
-        $this->nsqd->finish($this->id);
+        $this->nmOps->finish($this->id);
     }
 
     /**
@@ -128,7 +128,7 @@ class Message implements MessageInterface
      */
     public function delay($seconds)
     {
-        $this->nsqd->requeue($this->id, $seconds * 1000);
+        $this->nmOps->requeue($this->id, $seconds * 1000);
     }
 
     /**

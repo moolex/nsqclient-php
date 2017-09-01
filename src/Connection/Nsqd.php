@@ -12,6 +12,7 @@ use NSQClient\Access\Endpoint;
 use NSQClient\Connection\Transport\HTTP;
 use NSQClient\Connection\Transport\TCP;
 use NSQClient\Contract\Network\Stream;
+use NSQClient\Contract\NMOps;
 use NSQClient\Exception\GenericErrorException;
 use NSQClient\Exception\InvalidMessageException;
 use NSQClient\Exception\NetworkSocketException;
@@ -24,7 +25,7 @@ use NSQClient\Protocol\CommandHTTP;
 use NSQClient\Protocol\Specification;
 use NSQClient\SDK;
 
-class Nsqd
+class Nsqd implements NMOps
 {
     /**
      * @var Endpoint
