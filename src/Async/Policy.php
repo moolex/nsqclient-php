@@ -13,6 +13,11 @@ use NSQClient\Exception\GenericErrorException;
 class Policy
 {
     /**
+     * Max slots in pool (for node connection)
+     */
+    const POOL_MAX_SLOTS = 'pool-max-slots';
+
+    /**
      * Timeout for dns resolver
      */
     const DNS_TIMEOUT_MS = 'dns-timeout-ms';
@@ -41,6 +46,7 @@ class Policy
      * @var array
      */
     private $items = [
+        self::POOL_MAX_SLOTS => 100,
         self::DNS_TIMEOUT_MS => 500,
         self::PUB_TIMEOUT_MS => 2000,
         self::LOOKUP_TIMEOUT_MS => 1000,

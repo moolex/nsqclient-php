@@ -11,6 +11,7 @@ namespace NSQClient\Async;
 use NSQClient\Access\Endpoint;
 use NSQClient\Async\Connection\Lookupd;
 use NSQClient\Async\Connection\Pool;
+use NSQClient\Async\Exception\PoolSlotsOverflowException;
 use NSQClient\Async\Piping\Node;
 use NSQClient\Logger\Logger;
 
@@ -36,19 +37,26 @@ class Queue
 
             Logger::ins()->debug('queue::publish::node::picked', ['host' => $node['host']]);
 
-            // NOTICE : MOD_W has a locker when node been used (you can use lockCallback for auto un-locker)
-            Pool::hosting(Pool::MOD_W, $node, [$topic], function ($slotID) use ($endpoint, $node, $topic) {
+            try
+            {
+                // NOTICE : MOD_W has a locker when node been used (you can use lockCallback for auto un-locker)
+                Pool::hosting(Pool::MOD_W, $node, [$topic], function ($slotID) use ($endpoint, $node, $topic) {
 
-                $instance = new Node($node['host'], $node['port'], Node::MOD_PUB, $topic, $endpoint->getAsyncPolicy(), $slotID);
-                $instance->idleRecycle($endpoint->getAsyncPolicy()->get(Policy::PUBLISH_CONN_IDLING));
+                    $instance = new Node($node['host'], $node['port'], Node::MOD_PUB, $topic, $endpoint->getAsyncPolicy(), $slotID);
+                    $instance->idleRecycle($endpoint->getAsyncPolicy()->get(Policy::PUBLISH_CONN_IDLING));
 
-                Logger::ins()->info('queue::publish::pool::new', ['slot' => $slotID, 'topic' => $topic]);
+                    Logger::ins()->info('queue::publish::pool::new', ['slot' => $slotID, 'topic' => $topic]);
 
-                return $instance;
+                    return $instance;
 
-            })
-                ->setObservers($observers)
-                ->publish($message, Pool::lockCallback($resultCallback));
+                }, $endpoint->getAsyncPolicy()->get(Policy::POOL_MAX_SLOTS))
+                    ->setObservers($observers)
+                    ->publish($message, Pool::lockCallback($resultCallback));
+            }
+            catch (PoolSlotsOverflowException $e)
+            {
+                Observer::trigger($observers, Observer::EXCEPTION_WATCHER, $e);
+            }
 
         },
             $endpoint->getAsyncPolicy(), $observers,

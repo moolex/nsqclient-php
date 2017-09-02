@@ -581,10 +581,7 @@ class Node implements NMOps
         try
         {
             $buffer = new Buffer($data);
-            while ($buffer->readable())
-            {
-                Frame::processing(Specification::readFrame($buffer), $this);
-            }
+            while ($buffer->readable()) Frame::processing(Specification::readFrame($buffer), $this);
             unset($buffer);
         }
         catch (Exception $e)

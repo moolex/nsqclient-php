@@ -8,6 +8,7 @@
 
 namespace NSQClient\Async\Connection;
 
+use NSQClient\Async\Exception\PoolSlotsOverflowException;
 use NSQClient\Async\Piping\Node;
 use NSQClient\Exception\GenericErrorException;
 use NSQClient\Logger\Logger;
@@ -69,23 +70,24 @@ class Pool
 
     /**
      * get available node
-     * @param $mode
-     * @param $node
-     * @param $flags
+     * @param int $mode
+     * @param array $node
+     * @param array $flags
      * @param callable $proNodeInstance
+     * @param int $maxSlots
      * @return Node
      */
-    public static function hosting($mode, array $node, array $flags, callable $proNodeInstance)
+    public static function hosting($mode, array $node, array $flags, callable $proNodeInstance, $maxSlots = 0)
     {
         switch ($mode)
         {
             case self::MOD_R:
-                $slot = self::initialize(self::FLAG_STACK_SUB, self::$stackR, $node, $flags, $proNodeInstance);
+                $slot = self::initialize(self::FLAG_STACK_SUB, self::$stackR, $node, $flags, $proNodeInstance, $maxSlots);
                 // force locking
                 self::locking($slot['id']);
                 break;
             case self::MOD_W:
-                $slot = self::initialize(self::FLAG_STACK_PUB, self::$stackW, $node, $flags, $proNodeInstance);
+                $slot = self::initialize(self::FLAG_STACK_PUB, self::$stackW, $node, $flags, $proNodeInstance, $maxSlots);
                 // auto locking
                 self::locking($slot['id']);
                 break;
@@ -173,14 +175,15 @@ class Pool
     }
 
     /**
-     * @param $flag
-     * @param $stack
-     * @param $node
-     * @param $flags
+     * @param int $flag
+     * @param array $stack
+     * @param array $node
+     * @param array $flags
      * @param callable $proNodeInstance
+     * @param int $maxSlots
      * @return array
      */
-    private static function initialize($flag, &$stack, $node, $flags, callable $proNodeInstance)
+    private static function initialize($flag, array &$stack, array $node, array $flags, callable $proNodeInstance, $maxSlots)
     {
         $key = implode('-', array_merge([$node['host']], $node['port'], $flags));
 
@@ -207,6 +210,11 @@ class Pool
         }
         else
         {
+            if ($maxSlots > 0 && count($pool) > $maxSlots)
+            {
+                throw new PoolSlotsOverflowException('E_POOL_OVERFLOW');
+            }
+
             $id = self::genSlotID();
             $slot = [
                 'flag' => $flag,
