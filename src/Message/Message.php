@@ -62,7 +62,6 @@ class Message implements MessageInterface
         $this->payload = $payload;
         $this->attempts = $attempts;
         $this->timestamp = $timestamp;
-        $this->data = $id ? json_decode($payload, true) : json_encode($payload);
         $this->nmOps = $nmOps;
     }
 
@@ -87,6 +86,14 @@ class Message implements MessageInterface
      */
     public function data()
     {
+        if (is_null($this->data))
+        {
+            $this->data =
+                $this->payload instanceof Raw
+                    ? $this->payload->data()
+                    : ($this->id ? json_decode($this->payload, true) : json_encode($this->payload))
+            ;
+        }
         return $this->data;
     }
 

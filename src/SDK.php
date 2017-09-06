@@ -15,7 +15,7 @@ class SDK
     /**
      * sdk version
      */
-    const VERSION = '1.0';
+    const VERSION = '0.2.0';
 
     /**
      * amazing name
