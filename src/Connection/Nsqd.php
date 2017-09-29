@@ -128,7 +128,10 @@ class Nsqd
      */
     public function setProducer()
     {
-        $this->connTCP->setRecycling($this->lifecycle);
+        if ($this->connTCP)
+        {
+            $this->connTCP->setRecycling($this->lifecycle);
+        }
 
         return $this;
     }
