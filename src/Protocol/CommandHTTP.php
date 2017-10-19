@@ -16,10 +16,13 @@ class CommandHTTP
      * @param string $message
      * @return array
      */
-    public static function message($topic, $message)
+    public static function message($topic, $message, $deferred = null )
     {
+        $cmd = is_null($deferred)
+        ? sprintf('pub?topic=%s', $topic)
+        : sprintf('pub?topic=%s&defer=%s', $topic,$deferred);
         return [
-            sprintf('pub?topic=%s', $topic),
+            $cmd,
             Binary::packString($message)
         ];
     }

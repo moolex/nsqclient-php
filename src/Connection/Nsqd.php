@@ -264,7 +264,7 @@ class Nsqd
     {
         if ($message instanceof Message)
         {
-            list($uri, $data) = CommandHTTP::message($this->topic, $message->data());
+            list($uri, $data) = CommandHTTP::message($this->topic, $message->data(), $message->deferred());
         }
         else if ($message instanceof MessageBag)
         {
