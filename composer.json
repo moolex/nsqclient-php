@@ -3,14 +3,19 @@
   "keywords": ["nsq"],
   "license": "MIT",
   "require": {
-      "psr/log": "~1.0",
-      "react/event-loop": "~0.4",
-      "php": ">=5.6",
-      "ext-bcmath" : "*"
+    "php": ">=5.6",
+    "ext-json" : "*",
+    "ext-curl" : "*",
+    "ext-bcmath" : "*",
+    "psr/log": "~1.0",
+    "react/event-loop": "~0.4"
+  },
+  "suggest": {
+    "ext-pcntl": "graceful shutdown"
   },
   "autoload":{
-      "psr-4": {
-          "NSQClient\\": "src"
-      }
+    "psr-4": {
+      "NSQClient\\": "src"
+    }
   }
 }

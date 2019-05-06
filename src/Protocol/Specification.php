@@ -49,8 +49,7 @@ class Specification
         $frame = ['type' => $frameType, 'size'  => $size];
 
         // switch
-        switch ($frameType)
-        {
+        switch ($frameType) {
             case self::FRAME_TYPE_RESPONSE:
                 $frame['response'] = Binary::readString($buffer, $size - 4);
                 break;
@@ -69,10 +68,8 @@ class Specification
         }
 
         // check frame data
-        foreach ($frame as $k => $val)
-        {
-            if (is_null($val))
-            {
+        foreach ($frame as $k => $val) {
+            if (is_null($val)) {
                 $frame['type'] = self::FRAME_TYPE_BROKEN;
                 $frame['error'] = 'broken frame (maybe network error)';
                 break;

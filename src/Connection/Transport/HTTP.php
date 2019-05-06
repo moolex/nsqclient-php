@@ -45,7 +45,7 @@ class HTTP
      */
     public static function post($url, $data, $extOptions = [])
     {
-        return self::request($url, [CURLOPT_POST => TRUE, CURLOPT_POSTFIELDS => $data], $extOptions);
+        return self::request($url, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $data], $extOptions);
     }
 
     /**
@@ -60,17 +60,17 @@ class HTTP
 
         $initOptions = [
             CURLOPT_URL            => $url,
-            CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_HEADER         => FALSE,
-            CURLOPT_FOLLOWLOCATION => FALSE,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER         => false,
+            CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_ENCODING       => self::$encoding,
             CURLOPT_USERAGENT      => self::$agent,
             CURLOPT_HTTPHEADER     => self::$headers,
-            CURLOPT_FAILONERROR    => TRUE
+            CURLOPT_FAILONERROR    => true
         ];
 
         $selfOptions && $initOptions = self::mergeOptions($initOptions, $selfOptions);
-        $usrOptions  && $initOptions = self::mergeOptions($initOptions,  $usrOptions);
+        $usrOptions && $initOptions = self::mergeOptions($initOptions, $usrOptions);
 
         curl_setopt_array($ch, $initOptions);
 
@@ -90,8 +90,7 @@ class HTTP
      */
     private static function mergeOptions($base, $custom)
     {
-        foreach ($custom as $key => $val)
-        {
+        foreach ($custom as $key => $val) {
             $base[$key] = $val;
         }
         return $base;

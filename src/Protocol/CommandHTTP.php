@@ -33,8 +33,7 @@ class CommandHTTP
     public static function messages($topic, $messages)
     {
         $buffer = '';
-        foreach ($messages as $message)
-        {
+        foreach ($messages as $message) {
             $data = Binary::packString($message);
             $size = pack('N', strlen($data));
             $buffer .= $size . $data;

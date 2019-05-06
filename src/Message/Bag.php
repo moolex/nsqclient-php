@@ -22,8 +22,7 @@ class Bag
     public static function generate($list)
     {
         $bag = new self();
-        foreach ($list as $item)
-        {
+        foreach ($list as $item) {
             $bag->append(new Message($item));
         }
         return $bag;
@@ -43,8 +42,7 @@ class Bag
     public function export()
     {
         $bag = [];
-        foreach ($this->messages as $msg)
-        {
+        foreach ($this->messages as $msg) {
             $bag[] = $msg->data();
         }
         return $bag;

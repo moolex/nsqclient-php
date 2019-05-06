@@ -54,8 +54,7 @@ class Pool
     {
         $insKey = self::getInsKey($factors);
 
-        if (isset(self::$instances[$insKey]))
-        {
+        if (isset(self::$instances[$insKey])) {
             return self::$instances[$insKey];
         }
 
@@ -71,15 +70,12 @@ class Pool
     {
         $expectSockID = (int)$socket;
 
-        if (isset(self::$sockMaps[$expectSockID]))
-        {
+        if (isset(self::$sockMaps[$expectSockID])) {
             return self::$sockMaps[$expectSockID];
         }
 
-        foreach (self::$instances as $nsqd)
-        {
-            if ($nsqd->getSockID() == $expectSockID)
-            {
+        foreach (self::$instances as $nsqd) {
+            if ($nsqd->getSockID() == $expectSockID) {
                 self::$sockMaps[$nsqd->getSockID()] = $nsqd->getSockIns();
                 return $nsqd->getSockIns();
             }
@@ -93,8 +89,7 @@ class Pool
      */
     public static function getEvLoop()
     {
-        if (is_null(self::$evLoops))
-        {
+        if (is_null(self::$evLoops)) {
             self::$evLoops = Factory::create();
             GracefulShutdown::init(self::$evLoops);
         }
@@ -115,8 +110,7 @@ class Pool
     public static function setEvDetached()
     {
         self::$evAttached --;
-        if (self::$evAttached <= 0)
-        {
+        if (self::$evAttached <= 0) {
             Logger::ins()->info('ALL event detached .. perform shutdown');
             self::$evLoops && self::$evLoops->stop();
         }

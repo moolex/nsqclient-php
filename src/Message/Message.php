@@ -137,12 +137,9 @@ class Message implements MessageInterface
      */
     public function deferred($seconds = null)
     {
-        if (is_null($seconds))
-        {
+        if (is_null($seconds)) {
             return $this->deferred;
-        }
-        else
-        {
+        } else {
             $this->deferred = $seconds * 1000;
             return $this;
         }

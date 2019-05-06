@@ -34,8 +34,7 @@ class Endpoint
 
         // checks
         $parsed = parse_url($this->lookupd);
-        if (!isset($parsed['host']))
-        {
+        if (!isset($parsed['host'])) {
             throw new InvalidLookupdException;
         }
     }

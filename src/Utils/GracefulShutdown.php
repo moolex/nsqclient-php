@@ -34,10 +34,8 @@ class GracefulShutdown
      */
     public static function init(LoopInterface $evLoop)
     {
-        if (extension_loaded('pcntl'))
-        {
-            foreach (self::$acceptSignals as $signal => $name)
-            {
+        if (extension_loaded('pcntl')) {
+            foreach (self::$acceptSignals as $signal => $name) {
                 pcntl_signal($signal, [__CLASS__, 'signalHandler']);
             }
 
@@ -55,8 +53,7 @@ class GracefulShutdown
         Logger::ins()->info('Signal ['.self::$acceptSignals[$signal].'] received .. prepare shutdown');
 
         $instances = Pool::instances();
-        foreach ($instances as $nsqdIns)
-        {
+        foreach ($instances as $nsqdIns) {
             $nsqdIns->isConsumer() && $nsqdIns->closing();
         }
     }

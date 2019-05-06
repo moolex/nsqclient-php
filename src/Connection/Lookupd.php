@@ -33,8 +33,7 @@ class Lookupd
      */
     public static function getNodes(Endpoint $endpoint, $topic)
     {
-        if (isset(self::$caches[$endpoint->getUniqueID()][$topic]))
-        {
+        if (isset(self::$caches[$endpoint->getUniqueID()][$topic])) {
             return self::$caches[$endpoint->getUniqueID()][$topic];
         }
 
@@ -42,14 +41,11 @@ class Lookupd
 
         list($error, $result) = HTTP::get($url);
 
-        if ($error)
-        {
+        if ($error) {
             list($netErrNo, $netErrMsg) = $error;
             Logger::ins()->error('Lookupd request failed', ['no' => $netErrNo, 'msg' => $netErrMsg]);
             throw new LookupTopicException($netErrMsg, $netErrNo);
-        }
-        else
-        {
+        } else {
             Logger::ins()->debug('Lookupd results got', ['raw' => $result]);
             return self::$caches[$endpoint->getUniqueID()][$topic] = self::parseResult($result, $topic);
         }
@@ -66,10 +62,8 @@ class Lookupd
 
         $nodes = [];
 
-        if (isset($result['producers']))
-        {
-            foreach ($result['producers'] as $producer)
-            {
+        if (isset($result['producers'])) {
+            foreach ($result['producers'] as $producer) {
                 $nodes[] = [
                     'topic' => $scopeTopic,
                     'host' => $producer['broadcast_address'],

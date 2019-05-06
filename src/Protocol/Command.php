@@ -82,8 +82,7 @@ class Command
         $cmd = self::command('MPUB', $topic);
         $msgNum = pack('N', count($messages));
         $buffer = '';
-        foreach ($messages as $message)
-        {
+        foreach ($messages as $message) {
             $data = Binary::packString($message);
             $size = pack('N', strlen($data));
             $buffer .= $size . $data;

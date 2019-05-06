@@ -29,8 +29,7 @@ class Logger extends AbstractLogger
      */
     public static function ins()
     {
-        if (is_null(self::$instance))
-        {
+        if (is_null(self::$instance)) {
             self::$instance = new self;
         }
         return self::$instance;
@@ -51,12 +50,9 @@ class Logger extends AbstractLogger
      */
     public function log($level, $message, array $context = array())
     {
-        if (SDK::$presentLogger)
-        {
+        if (SDK::$presentLogger) {
             SDK::$presentLogger->log($level, $message, $context);
-        }
-        else
-        {
+        } else {
             $this->nullLogger->log($level, $message, $context);
         }
     }

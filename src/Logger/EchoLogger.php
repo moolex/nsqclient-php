@@ -82,9 +82,9 @@ class EchoLogger extends AbstractLogger
      */
     public function log($level, $message, array $context = array())
     {
-        if (in_array($level, $this->allows))
-        {
-            printf('[%s]%s[%s] : %s ~ %s %s',
+        if (in_array($level, $this->allows)) {
+            printf(
+                '[%s]%s[%s] : %s ~ %s %s',
                 $this->printableLevel($level),
                 " ",
                 date('Y-m-d H:i:s'),
@@ -123,12 +123,9 @@ class EchoLogger extends AbstractLogger
 
         array_walk($context, function ($item, $key) use (&$print) {
             $ctx = $this->colorBGN . $this->colorCtxKey . $key . $this->colorNO . '=';
-            if (is_array($item))
-            {
+            if (is_array($item)) {
                 $ctx .= json_encode($item, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            }
-            else
-            {
+            } else {
                 $ctx .= $item;
             }
             $print .= $ctx . ',';

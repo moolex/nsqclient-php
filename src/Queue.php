@@ -30,8 +30,8 @@ class Queue
 
         $keys = [$route['host'], $route['ports']['tcp']];
 
-        return Pool::register($keys, function () use ($endpoint, $route) {
-
+        return
+        Pool::register($keys, function () use ($endpoint, $route) {
             Logger::ins()->info('Creating new nsqd for producer', [
                 'lookupd' => $endpoint->getLookupd(),
                 'route' => $route
@@ -40,8 +40,10 @@ class Queue
                 ->setRoute($route)
                 ->setLifecycle(SDK::$pubRecyclingSec)
                 ->setProducer();
-
-        })->setTopic($topic)->publish($message);
+        })
+            ->setTopic($topic)
+            ->publish($message)
+        ;
     }
 
     /**
@@ -55,8 +57,7 @@ class Queue
     {
         $routes = Lookupd::getNodes($endpoint, $topic);
 
-        foreach ($routes as $route)
-        {
+        foreach ($routes as $route) {
             $keys = [$route['topic'], $route['host'], $route['ports']['tcp']];
 
             Pool::register($keys, function () use ($endpoint, $route, $topic, $processor, $lifecycle) {
@@ -72,8 +73,9 @@ class Queue
                     ->setTopic($topic)
                     ->setLifecycle($lifecycle)
                     ->setConsumer($processor);
-
-            })->subscribe($channel);
+            })
+                ->subscribe($channel)
+            ;
         }
 
         Pool::getEvLoop()->run();
