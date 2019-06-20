@@ -82,9 +82,7 @@ class Binary
         if (is_array($temp)) {
             $out = '';
             foreach ($temp as $v) {
-                if ($v > 0) {
                     $out .= chr($v);
-                }
             }
             return $out;
         } else {
